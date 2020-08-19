@@ -91,7 +91,9 @@ def likelihoodDaily(lst): #this function returns the likelihood of losing/gainin
     values_list = [] 
     for i in lst: 
         value = norm.cdf((i/100), mu, sigma) 
-        values_list.append(value) 
+        if i > 0: 
+            value = 1 - value 
+        values_list.append(value)
     likelihood['%'] = values_list  
     print(likelihood)
 
@@ -99,8 +101,8 @@ likelihoodDaily(loss_daily) #call function on loss list
 likelihoodDaily(gain_daily) #call function on gain list 
 
 ##YEARLY (the multiple will change depending on entires; 1Y data has 220 entries, 272 entries) 
-mu272 = mu * 272 
-sigma272 = (272**0.5) * sigma 
+mu250 = mu * 250 
+sigma250 = (250**0.5) * sigma 
 
 loss_yearly = [-5, -10, -15, -20] #percentages loss list - larger because yearly fluctuations = larger 
 gain_yearly = [5, 10, 15, 20] #percentages gain list
@@ -111,13 +113,37 @@ def likelihoodYearly(lst): #this function returns the likelihood of losing/gaini
     likelihood = likelihood.set_index('Loss/Gain Yearly')
     values_list = [] 
     for i in lst: 
-        value = norm.cdf((i/100), mu272, sigma272) 
+        value = norm.cdf((i/100), mu250, sigma250) 
+        if i > 0: 
+            value = 1 - value 
         values_list.append(value) 
     likelihood['%'] = values_list  
     print(likelihood) 
 
 likelihoodYearly(loss_yearly) #calling function on loss % 
 likelihoodYearly(gain_yearly) #calling function on gain %
+
+mu60 = mu * 60 
+sigma60 = (60**0.5) * sigma 
+
+loss_quarterly = [-5, -10, -15, -20] #percentages loss list - larger because quarterly fluctuations = larger 
+gain_quarterly = [5, 10, 15, 20] #percentages gain list
+
+def likelihoodQuarterly(lst): #this function returns the likelihood of losing/gaining x% 
+    likelihood = pd.DataFrame() 
+    likelihood['Loss/Gain Quarterly'] = lst
+    likelihood = likelihood.set_index('Loss/Gain Quarterly')
+    values_list = [] 
+    for i in lst: 
+        value = norm.cdf((i/100), mu60, sigma60) 
+        if i > 0: 
+            value = 1 - value 
+        values_list.append(value) 
+    likelihood['%'] = values_list  
+    print(likelihood) 
+
+likelihoodQuarterly(loss_quarterly) #calling function on loss % 
+likelihoodQuarterly(gain_quarterly) #calling function on gain %
 
 # ----------- VALUES AT RISK AND BUYING STRATEGIES - Confidence Interval that Investment will return a gain/loss 
 quantiles = [1, 5, 95, 99] #the 95th and 99th are usually the most important 
@@ -137,15 +163,28 @@ def findVaRDaily(lst): #this function returns VaR for implied quantiles
 
 findVaRDaily(quantiles) #calling function on VaR 
 
+def findVaRQuarterly(lst): #this function returns VaR for implied quantiles 
+    var = pd.DataFrame() 
+    var['Confidence Interval'] = quantiles 
+    var = var.set_index('Confidence Interval') 
+    VaR = [] 
+    for i in lst: 
+        value = norm.ppf((i/100), mu, sigma)
+        VaR.append(value) 
+    var['Loss/Gain Quarterly'] = VaR 
+    print(var)  
+
+findVaRQuarterly(quantiles) #calling function on VaR 
+
 def findVaRYearly(lst): #this function returns VaR for implied quantiles 
     var = pd.DataFrame() 
     var['Confidence Interval'] = quantiles 
     var = var.set_index('Confidence Interval') 
     VaR = [] 
     for i in lst: 
-        value = norm.ppf((i/100), mu272, sigma272)
+        value = norm.ppf((i/100), mu250, sigma250)
         VaR.append(value) 
     var['Loss/Gain Yearly'] = VaR 
-    print(var)  
+    print(var) 
 
 findVaRYearly(quantiles) #calling function on VaR 

@@ -20,7 +20,7 @@ Why each lib:
 6. **datetime**: added functionality 
 
 ## Notes on Data 
-The data was written specifically to parse and analyse data taken from [Investing.com](https://www.investing.com/). It might not worth with other CSV files which has a different format. 
+The data was written specifically to parse and analyse data taken from [Investing.com](https://www.investing.com/). Note, **English** version only. It might not worth with other CSV files which has a different format. 
 
 To download historical data from Investing.com: 
 1. Look up ticker 

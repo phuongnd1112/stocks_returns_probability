@@ -120,9 +120,11 @@ likelihoodYearly(loss_yearly) #calling function on loss %
 likelihoodYearly(gain_yearly) #calling function on gain %
 
 # ----------- VALUES AT RISK AND BUYING STRATEGIES - Confidence Interval that Investment will return a gain/loss 
-quantiles = [5, 10, 25, 75, 95, 99] #the 95th and 99th are usually the most important 
+quantiles = [1, 5, 95, 99] #the 95th and 99th are usually the most important 
+#1 and 5 are for losses (left-tail) 
+#95 and 99 are for gains (right-tail)
 
-def findVaR(lst): #this function returns VaR for implied quantiles 
+def findVaRDaily(lst): #this function returns VaR for implied quantiles 
     var = pd.DataFrame() 
     var['Confidence Interval'] = quantiles 
     var = var.set_index('Confidence Interval') 
@@ -130,7 +132,20 @@ def findVaR(lst): #this function returns VaR for implied quantiles
     for i in lst: 
         value = norm.ppf((i/100), mu, sigma)
         VaR.append(value) 
-    var['Loss/Gain'] = VaR 
+    var['Loss/Gain Daily'] = VaR 
     print(var)  
 
-findVaR(quantiles) #calling function on VaR 
+findVaRDaily(quantiles) #calling function on VaR 
+
+def findVaRYearly(lst): #this function returns VaR for implied quantiles 
+    var = pd.DataFrame() 
+    var['Confidence Interval'] = quantiles 
+    var = var.set_index('Confidence Interval') 
+    VaR = [] 
+    for i in lst: 
+        value = norm.ppf((i/100), mu272, sigma272)
+        VaR.append(value) 
+    var['Loss/Gain Yearly'] = VaR 
+    print(var)  
+
+findVaRYearly(quantiles) #calling function on VaR 

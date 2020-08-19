@@ -92,7 +92,7 @@ def likelihoodDaily(lst): #this function returns the likelihood of losing/gainin
     for i in lst: 
         value = norm.cdf((i/100), mu, sigma) 
         if i > 0: 
-            value = 1 - value 
+            value = 1 - value #because the PDF / CDF calculates the total area up to value, subtract from 1 
         values_list.append(value)
     likelihood['%'] = values_list  
     print(likelihood)

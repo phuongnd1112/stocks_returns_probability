@@ -146,9 +146,8 @@ likelihoodQuarterly(loss_quarterly) #calling function on loss %
 likelihoodQuarterly(gain_quarterly) #calling function on gain %
 
 # ----------- VALUES AT RISK AND BUYING STRATEGIES - Confidence Interval that Investment will return a gain/loss 
-quantiles = [1, 5, 95, 99] #the 95th and 99th are usually the most important 
+quantiles = [1, 5] #the 95th and 99th are usually the most important 
 #1 and 5 are for losses (left-tail) 
-#95 and 99 are for gains (right-tail)
 
 def findVaRDaily(lst): #this function returns VaR for implied quantiles 
     var = pd.DataFrame() 
@@ -169,7 +168,7 @@ def findVaRQuarterly(lst): #this function returns VaR for implied quantiles
     var = var.set_index('Confidence Interval') 
     VaR = [] 
     for i in lst: 
-        value = norm.ppf((i/100), mu, sigma)
+        value = norm.ppf((i/100), mu60, sigma60)
         VaR.append(value) 
     var['Loss/Gain Quarterly'] = VaR 
     print(var)  

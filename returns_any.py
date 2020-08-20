@@ -18,9 +18,9 @@ figure_save = input('Where do you want your graphs saved to: ')
 
 # ----------- function IMPORT AND CLEAN DATA 
 df = pd.read_csv(str(file_path), index_col = 'Date', parse_dates = True, thousands = ',') #read csv file, index Date, remove , from numerics 
-df = df.drop(pd.to_datetime(datetime.date(datetime.now()))) #because the file will contain today's date, drop not useful data 
+#df = df.drop(pd.to_datetime(datetime.date(datetime.now()))) #because the file will contain today's date, drop not useful data 
+#df = df.drop([0,1])
 df = df.drop(['Vol.', 'Change %', 'High', 'Low'], axis = 1) #drop unused columns 
-
 
 # ----------- CALCULATE RETURNS AND % RETURNS 
 df['Price_1'] = df['Price'].shift(-1) #shift price 
@@ -149,13 +149,7 @@ def likelihoodYearly(lst): #this function returns the likelihood of losing/gaini
 likelihoodYearly(loss_yearly) #calling function on loss % 
 likelihoodYearly(gain_yearly) #calling function on gain %
 
-# ----------- VALUES AT RISK AND BUYING STRATEGIES - Confidence Interval that Investment will return a gain/loss 
-quantiles = [1, 5] #the 95th and 99th are usually the most important 
-#because we are interested in the confidence interval for losses, we will need to find the 1th and 5th percentiles (far left-tail); this in turn returns 95th and 99th confidence interval 
-'''z-left_90 = ppf(0.05) 
-z_right_90 = ppf(0.95) 
-z_left_95 = ppf(0.025) 
-z_right_95 = ppf(0.975)'''
+# ----------- VALUES AT RISK AND BUYING STRATEGIES - Confidence Interval that Investment will return a gain/loss / two-tailed test
 
 confidence_interval = [90,95]
 
@@ -176,9 +170,9 @@ def findVaRDaily(lst): #this function returns VaR for implied quantiles at daily
         right_interval=sample_mean+z_right*sample_std 
         left.append(left_interval) 
         right.append(right_interval) 
-    var['Maximum Loss %'] = left
-    var['Maximum Gain %'] = right
-    print(var)  
+    var['Minimum Returns %'] = left
+    var['Maximum Returns %'] = right
+    print(var)
 
 findVaRDaily(confidence_interval) #calling function on VaR 
 
@@ -196,13 +190,13 @@ def findVaRQuarterly(lst): #this function returns VaR for implied quantiles at d
         right_interval=(sample_mean*60)+z_right*sample_std*60 
         left.append(left_interval) 
         right.append(right_interval) 
-    var['Maximum Loss %'] = left
-    var['Maximum Gain %'] = right
+    var['Minimum Returns %'] = left
+    var['Maximum Returns %'] = right
     print(var)  
 
 findVaRQuarterly(confidence_interval)
 
-##YEARLY
+'''##YEARLY
 def findVaRYearly(lst): #this function returns VaR for implied quantiles at daily levels 
     var = pd.DataFrame() 
     var['Confidence Interval'] = confidence_interval 
@@ -216,8 +210,8 @@ def findVaRYearly(lst): #this function returns VaR for implied quantiles at dail
         right_interval=(sample_mean*250)+z_right*sample_std*250
         left.append(left_interval) 
         right.append(right_interval) 
-    var['Maximum Loss %'] = left
-    var['Maximum Gain %'] = right
+    var['Minimum Returns %'] = left
+    var['Maximum Returns %'] = right
     print(var)  
 
-findVaRYearly(confidence_interval)
+findVaRYearly(confidence_interval)'''

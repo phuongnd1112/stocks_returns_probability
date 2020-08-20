@@ -74,11 +74,14 @@ pdf['pdf'] = norm.pdf(pdf['x'], mu, sigma)  #using PDF function from norm to gen
 #graphing distribution 
 sns.set()
 plt.figure(figsize=[10,10]) 
-df['LogReturns'].hist(bins=20) #log returns data 
-plt.plot(pdf['x'],pdf['pdf'], color='red') #normal curve 
+df['LogReturns'].hist(bins=20, color='lightseagreen') #log returns data 
+plt.plot(pdf['x'],pdf['pdf'], color='blueviolet') #normal curve 
+plt.title('Distribution of Log Returns')
+plt.xlabel('Percentage Returns')
+plt.ylabel('PDF(x)')
 plt.savefig(str(figure_save)+'/LogReturns')
 
-# ----------- LIKELIHOOD FOR % OF RETURNS 
+# ----------- LIKELIHOOD FOR % OF RETURNS (This calculates the probability that investment will gain/loss a certain % or above, refer to normal distribution curve the the cummulative density function to understand mathematics) 
 
 loss_daily = [-1, -3, -5, -7] #percentages loss list - small because daily fluctuations = small 
 gain_daily = [1, 3, 5, 7] #percentages gain list 
@@ -99,6 +102,29 @@ def likelihoodDaily(lst): #this function returns the likelihood of losing/gainin
 
 likelihoodDaily(loss_daily) #call function on loss list 
 likelihoodDaily(gain_daily) #call function on gain list 
+
+##QUARTERLY (multiples is 60, average active days in one quarter) 
+mu60 = mu * 60 
+sigma60 = (60**0.5) * sigma 
+
+loss_quarterly = [-5, -10, -15, -20] #percentages loss list - larger because quarterly fluctuations = larger 
+gain_quarterly = [5, 10, 15, 20] #percentages gain list
+
+def likelihoodQuarterly(lst): #this function returns the likelihood of losing/gaining x% 
+    likelihood = pd.DataFrame() 
+    likelihood['Loss/Gain Quarterly'] = lst
+    likelihood = likelihood.set_index('Loss/Gain Quarterly')
+    values_list = [] 
+    for i in lst: 
+        value = norm.cdf((i/100), mu60, sigma60) 
+        if i > 0: 
+            value = 1 - value 
+        values_list.append(value) 
+    likelihood['%'] = values_list  
+    print(likelihood) 
+
+likelihoodQuarterly(loss_quarterly) #calling function on loss % 
+likelihoodQuarterly(gain_quarterly) #calling function on gain %
 
 ##YEARLY (the multiple will change depending on entires; 1Y data has 220 entries, 272 entries) 
 mu250 = mu * 250 
@@ -123,67 +149,75 @@ def likelihoodYearly(lst): #this function returns the likelihood of losing/gaini
 likelihoodYearly(loss_yearly) #calling function on loss % 
 likelihoodYearly(gain_yearly) #calling function on gain %
 
-mu60 = mu * 60 
-sigma60 = (60**0.5) * sigma 
-
-loss_quarterly = [-5, -10, -15, -20] #percentages loss list - larger because quarterly fluctuations = larger 
-gain_quarterly = [5, 10, 15, 20] #percentages gain list
-
-def likelihoodQuarterly(lst): #this function returns the likelihood of losing/gaining x% 
-    likelihood = pd.DataFrame() 
-    likelihood['Loss/Gain Quarterly'] = lst
-    likelihood = likelihood.set_index('Loss/Gain Quarterly')
-    values_list = [] 
-    for i in lst: 
-        value = norm.cdf((i/100), mu60, sigma60) 
-        if i > 0: 
-            value = 1 - value 
-        values_list.append(value) 
-    likelihood['%'] = values_list  
-    print(likelihood) 
-
-likelihoodQuarterly(loss_quarterly) #calling function on loss % 
-likelihoodQuarterly(gain_quarterly) #calling function on gain %
-
 # ----------- VALUES AT RISK AND BUYING STRATEGIES - Confidence Interval that Investment will return a gain/loss 
 quantiles = [1, 5] #the 95th and 99th are usually the most important 
-#1 and 5 are for losses (left-tail) 
+#because we are interested in the confidence interval for losses, we will need to find the 1th and 5th percentiles (far left-tail); this in turn returns 95th and 99th confidence interval 
+'''z-left_90 = ppf(0.05) 
+z_right_90 = ppf(0.95) 
+z_left_95 = ppf(0.025) 
+z_right_95 = ppf(0.975)'''
 
-def findVaRDaily(lst): #this function returns VaR for implied quantiles 
+confidence_interval = [90,95]
+
+sample_mean = df['LogReturns'].mean() 
+sample_std = df['LogReturns'].std(ddof=1)/df.shape[0]**0.5 
+
+##DAILY 
+def findVaRDaily(lst): #this function returns VaR for implied quantiles at daily levels 
     var = pd.DataFrame() 
-    var['Confidence Interval'] = quantiles 
+    var['Confidence Interval'] = confidence_interval 
     var = var.set_index('Confidence Interval') 
-    VaR = [] 
+    left = [] 
+    right = []
     for i in lst: 
-        value = norm.ppf((i/100), mu, sigma)
-        VaR.append(value) 
-    var['Loss/Gain Daily'] = VaR 
+        z_left = 0 + ((100-i)/2)/100
+        z_right = 1 + ((100-i)/2)/100
+        left_interval=sample_mean+z_left*sample_std 
+        right_interval=sample_mean+z_right*sample_std 
+        left.append(left_interval) 
+        right.append(right_interval) 
+    var['Maximum Loss %'] = left
+    var['Maximum Gain %'] = right
     print(var)  
 
-findVaRDaily(quantiles) #calling function on VaR 
+findVaRDaily(confidence_interval) #calling function on VaR 
 
-def findVaRQuarterly(lst): #this function returns VaR for implied quantiles 
+##QUARTERLY 
+def findVaRQuarterly(lst): #this function returns VaR for implied quantiles at daily levels 
     var = pd.DataFrame() 
-    var['Confidence Interval'] = quantiles 
+    var['Confidence Interval'] = confidence_interval 
     var = var.set_index('Confidence Interval') 
-    VaR = [] 
+    left = [] 
+    right = []
     for i in lst: 
-        value = norm.ppf((i/100), mu60, sigma60)
-        VaR.append(value) 
-    var['Loss/Gain Quarterly'] = VaR 
+        z_left = 0 + ((100-i)/2)/100
+        z_right = 1 + ((100-i)/2)/100
+        left_interval=(sample_mean*60)+z_left*sample_std*60
+        right_interval=(sample_mean*60)+z_right*sample_std*60 
+        left.append(left_interval) 
+        right.append(right_interval) 
+    var['Maximum Loss %'] = left
+    var['Maximum Gain %'] = right
     print(var)  
 
-findVaRQuarterly(quantiles) #calling function on VaR 
+findVaRQuarterly(confidence_interval)
 
-def findVaRYearly(lst): #this function returns VaR for implied quantiles 
+##YEARLY
+def findVaRYearly(lst): #this function returns VaR for implied quantiles at daily levels 
     var = pd.DataFrame() 
-    var['Confidence Interval'] = quantiles 
+    var['Confidence Interval'] = confidence_interval 
     var = var.set_index('Confidence Interval') 
-    VaR = [] 
+    left = [] 
+    right = []
     for i in lst: 
-        value = norm.ppf((i/100), mu250, sigma250)
-        VaR.append(value) 
-    var['Loss/Gain Yearly'] = VaR 
-    print(var) 
+        z_left = 0 + ((100-i)/2)/100
+        z_right = 1 + ((100-i)/2)/100
+        left_interval=(sample_mean*250)+z_left*sample_std*250 
+        right_interval=(sample_mean*250)+z_right*sample_std*250
+        left.append(left_interval) 
+        right.append(right_interval) 
+    var['Maximum Loss %'] = left
+    var['Maximum Gain %'] = right
+    print(var)  
 
-findVaRYearly(quantiles) #calling function on VaR 
+findVaRYearly(confidence_interval)

@@ -39,4 +39,27 @@ Next, the terminal will ask for a location to save charts/figures with the follo
 Insert your desired location's path. 
 
 ## Results 
-All results from the probability calculations and VaR calculations will be printed on the terminal. 
+All results from the probability calculations and VaR calculations will be printed on the terminal.  
+Working on Excel export. 
+
+##Intepreting Results 
+####Gain and Losses Figures 
+Because we are working with **cummulative density function**, these percentages should be read as "at least x% gain/loss". 
+* Sample intepretation: There is a 35% probability that there will be at least a 1% loss in stock XYZ day by day. 
+* Sample intepretation: There is a 11% proability that there will be at least a 3% gain in stock XYZ QoQ. 
+
+1. Daily 
+I set the percentages of daily gain/loss at 1, 3, 5 and 7%. These numbers were chosen because they provide realistic insights into **daily** % change; trials and runs proved than any percentages larger than 10 will result unmeaningful results. 
+
+2. Quarter and Yearly 
+I set the percentages of daily gain/loss at 5, 10, 15 and 20%. These numbers were chosen because they provide realistic insights into **quarterly and yearly** % change. 
+
+####Confidence Interval 
+The confidence interval shows how likely the returns will be within a certain range of % loss and gain. 
+The intervals chosen are the 90thth and 95th confidence interval. 
+* Sample interpretation: We are 99% confident that stock XYZ won't make a loss more than 0.4% and a gain of more than 0.1% daily. 
+* Sample interpretation: We are 95% confident that stock XYZ won't make a loss more than 13% and a gain of more than 25% daily. 
+
+
+
+

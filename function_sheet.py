@@ -100,7 +100,7 @@ def likelihoodQuarterly(lst): #this function returns the likelihood of losing/ga
     values_list = [] 
     compound_list = []
     for i in lst: 
-        value = norm.cdf((i/100), mu, sigma) 
+        value = norm.cdf((i/100), mu60, sigma60) 
         compounded_value = norm.cdf((i/100), mu60, sigma60)
         if i > 0: 
             value = 1 - value #because the PDF / CDF calculates the total area up to value, subtract from 1 
@@ -134,8 +134,8 @@ def findVaRDaily(lst): #this function returns VaR for implied quantiles at daily
     left = [] 
     right = []
     for i in lst: 
-        z_left = 0 + ((100-i)/2)/100
-        z_right = 1 + ((100-i)/2)/100
+        z_left = sample_mean - (i/2)/100
+        z_right = sample_mean + (i/2)/100
         left_interval=sample_mean+z_left*sample_std 
         right_interval=sample_mean+z_right*sample_std 
         left.append(left_interval) 
@@ -155,8 +155,8 @@ def findVaRQuarterly(lst): #this function returns VaR for implied quantiles at d
     left = [] 
     right = []
     for i in lst: 
-        z_left = 0 + ((100-i)/2)/100
-        z_right = 1 + ((100-i)/2)/100
+        z_left = sample_mean*60 - (i/2)/100
+        z_right = sample_mean*60 + (i/2)/100
         left_interval=(sample_mean*60)+z_left*sample_std*60
         right_interval=(sample_mean*60)+z_right*sample_std*60 
         left.append(left_interval) 

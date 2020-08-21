@@ -2,7 +2,6 @@
 #PLEASE READ DOCUMENTATION BEFORE RUNNING SCRIPT 
 
 #pip3 install pandas numpy matplotlib seaborn scipy.stats datetime
-#pip3 install --upgrade --index=https://developer:hrFWTKJadtjekw5zLi5J@nexus.tcbs.com.vn/repository/pypi/simple tcdata-dev
 import pandas as pd 
 import numpy as np 
 import matplotlib.pyplot as plt 

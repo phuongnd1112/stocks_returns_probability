@@ -24,8 +24,6 @@ df = df.rename(columns = {'openPriceAdjusted': 'Open', 'closePriceAdjusted':'Pri
 df['dateReport'] = pd.to_datetime(df['dateReport'])
 df = df.set_index('dateReport')
 
-print(df.index)
-
 # ----------- CALCULATE RETURNS AND % RETURNS 
 df['Price_1'] = df['Price'].shift(-1) #shift price 
 df['Daily Returns'] = df['Price_1'] - df['Price'] #calculate daily returns 

@@ -1,4 +1,4 @@
-# STOCKS RETURNS AND MOVING AVERAGES FROM INVESTING.COM DATA 
+# STOCKS RETURNS ANALYSES
 PLEASE READ BEFORE BEGINNING. 
 This script provides a quick tool to aid with analysing and visualising stocks returns. Functionalities: 
 - Graphing moving averages 

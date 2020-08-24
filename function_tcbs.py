@@ -18,7 +18,7 @@ figure_save = input('Where do you want your graphs saved to: ')
 ticker = input('Ticker: ') #allow user to input ticker 
 
 # ----------- IMPORT DATA FROM TCBS DATABASE
-df = tcbsm.stock_prices([str(ticker)], 375)
+df = tcbsm.stock_prices([str(ticker)], 60)
 df = df.rename(columns = {'openPriceAdjusted': 'Open', 'closePriceAdjusted':'Price'}) #change column name for convenience
 df['dateReport'] = pd.to_datetime(df['dateReport'])
 df = df.set_index('dateReport')
@@ -39,6 +39,11 @@ sigma = df['LogReturns'].std(ddof=1) #finding a log std (ddof=1) because it reli
 pdf = pd.DataFrame() #empty dataFrame to store important variables 
 pdf['x'] = np.arange(df['LogReturns'].min()-0.01, df['LogReturns'].max()+0.01, 0.001) #generating a range 'x', normal curve 
 pdf['pdf'] = norm.pdf(pdf['x'], mu, sigma)  #using PDF function from norm to generate a normal curve, based on mu and sigma from data 
+
+sns.set()
+plt.figure(figsize=[10,10]) 
+plt.plot(df['LogReturns'])
+plt.show() 
 
 #graphing distribution 
 sns.set()

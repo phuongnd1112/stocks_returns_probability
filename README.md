@@ -6,6 +6,10 @@ This script provides a quick tool to aid with analysing and visualising stocks r
 - Calculate probability of % loss and gain 
 - Calculate Values at Risk (VaR) at set confidence intervals 
 
+Script Specific Requirements
+```function_general``` Data From Investing.com 
+```function_tcbs``` API from TCBS (unv) 
+
 ## Install Packages 
 Install all packages used in the script before running by pasting either one of the following into the command line: 
 - ```pip3 install pandas numpy matplotlib seaborn scipy.stats datetime``` 
@@ -44,7 +48,7 @@ Working on Excel export.
 
 ##Intepreting Results 
 ####Gain and Losses Figures 
-Because we are working with **cummulative density function**, these percentages should be read as "at least x% gain/loss". 
+Because we are working with **cummulative density function (CDF)**, these percentages should be read as "at least x% gain/loss". 
 * Sample intepretation: There is a 35% probability that there will be at least a 1% loss in stock XYZ day by day. 
 * Sample intepretation: There is a 11% proability that there will be at least a 3% gain in stock XYZ QoQ. 
 

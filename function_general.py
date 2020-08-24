@@ -2,6 +2,8 @@
 #PLEASE READ DOCUMENTATION BEFORE RUNNING SCRIPT 
 
 #pip3 install pandas numpy matplotlib seaborn scipy.stats 
+#pip install pandas numpy matplotlib seaborn scipy.stats 
+
 import pandas as pd 
 import numpy as np 
 import matplotlib.pyplot as plt 
@@ -10,8 +12,6 @@ import seaborn as sns
 from scipy.stats import norm 
 from datetime import datetime 
 
-#BEFORE STARTING 
-
 # ----------- GETTING USER PATH TO FILE & FOLDER LOCATION 
 file_path = input('What is your file path: ')
 figure_save = input('Where do you want your graphs saved to: ')
@@ -19,7 +19,7 @@ figure_save = input('Where do you want your graphs saved to: ')
 # ----------- function IMPORT AND CLEAN DATA 
 df = pd.read_csv(str(file_path), index_col = 'Date', parse_dates = True, thousands = ',') #read csv file, index Date, remove , from numerics 
 #df = df.drop(pd.to_datetime(datetime.date(datetime.now()))) #because the file will contain today's date, drop not useful data 
-#df = df.drop([0,1])
+#df = df.drop([0,1]) #removed because functionality not needed
 df = df.drop(['Vol.', 'Change %', 'High', 'Low'], axis = 1) #drop unused columns 
 
 # ----------- CALCULATE RETURNS AND % RETURNS 
@@ -61,6 +61,7 @@ plt.legend(handles = [p0, p1, p2, p3, p4, p5])
 plt.savefig(str(figure_save)+'/MA')
 
 # ----------- LOG RETURNS AND DISTRIBUTION OF RETURNS 
+# ----------- LOG RETURNS AND DISTRIBUTION OF RETURNS 
 df['LogReturns'] = np.log(df['Price_1']) - np.log(df['Price']) #take the log return 
 
 mu = df['LogReturns'].mean() #finding a log mean 
@@ -70,6 +71,11 @@ sigma = df['LogReturns'].std(ddof=1) #finding a log std (ddof=1) because it reli
 pdf = pd.DataFrame() #empty dataFrame to store important variables 
 pdf['x'] = np.arange(df['LogReturns'].min()-0.01, df['LogReturns'].max()+0.01, 0.001) #generating a range 'x', normal curve 
 pdf['pdf'] = norm.pdf(pdf['x'], mu, sigma)  #using PDF function from norm to generate a normal curve, based on mu and sigma from data 
+
+sns.set()
+plt.figure(figsize=[10,10]) 
+plt.plot(df['LogReturns'])
+plt.show() 
 
 #graphing distribution 
 sns.set()
@@ -83,8 +89,8 @@ plt.savefig(str(figure_save)+'/LogReturns')
 
 # ----------- LIKELIHOOD FOR % OF RETURNS (This calculates the probability that investment will gain/loss a certain % or above, refer to normal distribution curve the the cummulative density function to understand mathematics) 
 
-loss_daily = [-1, -3, -5, -7] #percentages loss list - small because daily fluctuations = small 
-gain_daily = [1, 3, 5, 7] #percentages gain list 
+loss_range_daily = np.arange(-10, 0, 1) 
+gain_range_daily = np.arange(1, 11, 1) 
 
 ##DAILY CALCULATION
 def likelihoodDaily(lst): #this function returns the likelihood of losing/gaining x% 
@@ -92,62 +98,60 @@ def likelihoodDaily(lst): #this function returns the likelihood of losing/gainin
     likelihood['Loss/Gain Daily'] = lst 
     likelihood = likelihood.set_index('Loss/Gain Daily')
     values_list = [] 
+    compound_list = []
     for i in lst: 
         value = norm.cdf((i/100), mu, sigma) 
+        compounded_value = norm.cdf((i/100), mu, sigma)
         if i > 0: 
             value = 1 - value #because the PDF / CDF calculates the total area up to value, subtract from 1 
         values_list.append(value)
+        compound_list.append(compounded_value)
     likelihood['%'] = values_list  
+    likelihood['compound'] = compound_list
+    if lst[0] > 0: 
+        likelihood.to_csv(figure_save+'/gain_daily.csv')
+    else:
+        likelihood.to_csv(figure_save+'/loss_daily.csv')
     print(likelihood)
 
-likelihoodDaily(loss_daily) #call function on loss list 
-likelihoodDaily(gain_daily) #call function on gain list 
+likelihoodDaily(loss_range_daily) #call function on loss list 
+likelihoodDaily(gain_range_daily) #call function on gain list 
 
 ##QUARTERLY (multiples is 60, average active days in one quarter) 
 mu60 = mu * 60 
 sigma60 = (60**0.5) * sigma 
 
-loss_quarterly = [-5, -10, -15, -20] #percentages loss list - larger because quarterly fluctuations = larger 
-gain_quarterly = [5, 10, 15, 20] #percentages gain list
+loss_range = np.arange(-25, -4, 1)
+gain_range = np.arange(5, 26, 1)
+
+#loss_quarterly = [-5, -10, -15, -20] #percentages loss list - larger because quarterly fluctuations = larger 
+#gain_quarterly = [5, 10, 15, 20] #percentages gain list
 
 def likelihoodQuarterly(lst): #this function returns the likelihood of losing/gaining x% 
     likelihood = pd.DataFrame() 
     likelihood['Loss/Gain Quarterly'] = lst
     likelihood = likelihood.set_index('Loss/Gain Quarterly')
     values_list = [] 
+    compound_list = []
     for i in lst: 
         value = norm.cdf((i/100), mu60, sigma60) 
+        compounded_value = norm.cdf((i/100), mu60, sigma60)
         if i > 0: 
-            value = 1 - value 
-        values_list.append(value) 
+            value = 1 - value #because the PDF / CDF calculates the total area up to value, subtract from 1 
+        values_list.append(value)
+        compound_list.append(compounded_value)
     likelihood['%'] = values_list  
+    likelihood['compound'] = compound_list 
+    if lst[0] > 1: 
+        likelihood.to_csv(figure_save+'/gain_quarter.csv')
+    else:
+        likelihood.to_csv(figure_save+'/loss_quarter.csv')
     print(likelihood) 
 
-likelihoodQuarterly(loss_quarterly) #calling function on loss % 
-likelihoodQuarterly(gain_quarterly) #calling function on gain %
+likelihoodQuarterly(loss_range) #calling function on loss % 
+likelihoodQuarterly(gain_range) #calling function on gain %
 
 ##YEARLY (the multiple will change depending on entires; 1Y data has 220 entries, 272 entries) 
-mu250 = mu * 250 
-sigma250 = (250**0.5) * sigma 
-
-loss_yearly = [-5, -10, -15, -20] #percentages loss list - larger because yearly fluctuations = larger 
-gain_yearly = [5, 10, 15, 20] #percentages gain list
-
-def likelihoodYearly(lst): #this function returns the likelihood of losing/gaining x% 
-    likelihood = pd.DataFrame() 
-    likelihood['Loss/Gain Yearly'] = lst
-    likelihood = likelihood.set_index('Loss/Gain Yearly')
-    values_list = [] 
-    for i in lst: 
-        value = norm.cdf((i/100), mu250, sigma250) 
-        if i > 0: 
-            value = 1 - value 
-        values_list.append(value) 
-    likelihood['%'] = values_list  
-    print(likelihood) 
-
-likelihoodYearly(loss_yearly) #calling function on loss % 
-likelihoodYearly(gain_yearly) #calling function on gain %
 
 # ----------- VALUES AT RISK AND BUYING STRATEGIES - Confidence Interval that Investment will return a gain/loss / two-tailed test
 
@@ -164,14 +168,15 @@ def findVaRDaily(lst): #this function returns VaR for implied quantiles at daily
     left = [] 
     right = []
     for i in lst: 
-        z_left = 0 + ((100-i)/2)/100
-        z_right = 1 + ((100-i)/2)/100
+        z_left = sample_mean - (i/2)/100
+        z_right = sample_mean + (i/2)/100
         left_interval=sample_mean+z_left*sample_std 
         right_interval=sample_mean+z_right*sample_std 
         left.append(left_interval) 
         right.append(right_interval) 
     var['Minimum Returns %'] = left
     var['Maximum Returns %'] = right
+    var.to_csv(figure_save+'/VaRDaily.csv')
     print(var)
 
 findVaRDaily(confidence_interval) #calling function on VaR 
@@ -184,34 +189,15 @@ def findVaRQuarterly(lst): #this function returns VaR for implied quantiles at d
     left = [] 
     right = []
     for i in lst: 
-        z_left = 0 + ((100-i)/2)/100
-        z_right = 1 + ((100-i)/2)/100
+        z_left = sample_mean*60 - (i/2)/100
+        z_right = sample_mean*60 + (i/2)/100
         left_interval=(sample_mean*60)+z_left*sample_std*60
         right_interval=(sample_mean*60)+z_right*sample_std*60 
         left.append(left_interval) 
         right.append(right_interval) 
     var['Minimum Returns %'] = left
     var['Maximum Returns %'] = right
+    var.to_csv(figure_save+'/VaRQuarterly.csv')
     print(var)  
 
 findVaRQuarterly(confidence_interval)
-
-'''##YEARLY
-def findVaRYearly(lst): #this function returns VaR for implied quantiles at daily levels 
-    var = pd.DataFrame() 
-    var['Confidence Interval'] = confidence_interval 
-    var = var.set_index('Confidence Interval') 
-    left = [] 
-    right = []
-    for i in lst: 
-        z_left = 0 + ((100-i)/2)/100
-        z_right = 1 + ((100-i)/2)/100
-        left_interval=(sample_mean*250)+z_left*sample_std*250 
-        right_interval=(sample_mean*250)+z_right*sample_std*250
-        left.append(left_interval) 
-        right.append(right_interval) 
-    var['Minimum Returns %'] = left
-    var['Maximum Returns %'] = right
-    print(var)  
-
-findVaRYearly(confidence_interval)'''

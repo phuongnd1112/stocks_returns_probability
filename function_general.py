@@ -168,10 +168,9 @@ def findVaRDaily(lst): #this function returns VaR for implied quantiles at daily
     left = [] 
     right = []
     for i in lst: 
-        z_left = sample_mean - (i/2)/100
-        z_right = sample_mean + (i/2)/100
-        left_interval=sample_mean+z_left*sample_std 
-        right_interval=sample_mean+z_right*sample_std 
+        z_value = sample_mean + (i/2)/100
+        left_interval=sample_mean-z_value*sample_std 
+        right_interval=sample_mean+z_value*sample_std 
         left.append(left_interval) 
         right.append(right_interval) 
     var['Minimum Returns %'] = left
@@ -181,23 +180,22 @@ def findVaRDaily(lst): #this function returns VaR for implied quantiles at daily
 
 findVaRDaily(confidence_interval) #calling function on VaR 
 
-##QUARTERLY 
-def findVaRQuarterly(lst): #this function returns VaR for implied quantiles at daily levels 
+##MONTHLY 
+def findVaRMonthly(lst): #this function returns VaR for implied quantiles at daily levels 
     var = pd.DataFrame() 
     var['Confidence Interval'] = confidence_interval 
     var = var.set_index('Confidence Interval') 
     left = [] 
     right = []
     for i in lst: 
-        z_left = sample_mean*60 - (i/2)/100
-        z_right = sample_mean*60 + (i/2)/100
-        left_interval=(sample_mean*60)+z_left*sample_std*60
-        right_interval=(sample_mean*60)+z_right*sample_std*60 
+        z_value = sample_mean*20 + (i/2)/100
+        left_interval=sample_mean*20-z_value*sample_std 
+        right_interval=sample_mean*20+z_value*sample_std 
         left.append(left_interval) 
         right.append(right_interval) 
     var['Minimum Returns %'] = left
     var['Maximum Returns %'] = right
-    var.to_csv(figure_save+'/VaRQuarterly.csv')
+    var.to_csv(figure_save+'/VaRMonthly.csv')
     print(var)  
 
-findVaRQuarterly(confidence_interval)
+findVaRMonthly(confidence_interval)

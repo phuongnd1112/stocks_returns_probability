@@ -118,8 +118,8 @@ likelihoodDaily(loss_range_daily) #call function on loss list
 likelihoodDaily(gain_range_daily) #call function on gain list 
 
 ##QUARTERLY (multiples is 60, average active days in one quarter) 
-mu60 = mu * 60 
-sigma60 = (60**0.5) * sigma 
+mu20 = mu * 20 
+sigma20 = (20**0.5) * sigma 
 
 loss_range = np.arange(-25, -4, 1)
 gain_range = np.arange(5, 26, 1)
@@ -127,15 +127,15 @@ gain_range = np.arange(5, 26, 1)
 #loss_quarterly = [-5, -10, -15, -20] #percentages loss list - larger because quarterly fluctuations = larger 
 #gain_quarterly = [5, 10, 15, 20] #percentages gain list
 
-def likelihoodQuarterly(lst): #this function returns the likelihood of losing/gaining x% 
+def likelihoodMonthly(lst): #this function returns the likelihood of losing/gaining x% 
     likelihood = pd.DataFrame() 
-    likelihood['Loss/Gain Quarterly'] = lst
-    likelihood = likelihood.set_index('Loss/Gain Quarterly')
+    likelihood['Loss/Gain Monthly'] = lst
+    likelihood = likelihood.set_index('Loss/Gain Monthly')
     values_list = [] 
     compound_list = []
     for i in lst: 
-        value = norm.cdf((i/100), mu60, sigma60) 
-        compounded_value = norm.cdf((i/100), mu60, sigma60)
+        value = norm.cdf((i/100), mu20, sigma20) 
+        compounded_value = norm.cdf((i/100), mu20, sigma20)
         if i > 0: 
             value = 1 - value #because the PDF / CDF calculates the total area up to value, subtract from 1 
         values_list.append(value)
@@ -143,13 +143,13 @@ def likelihoodQuarterly(lst): #this function returns the likelihood of losing/ga
     likelihood['%'] = values_list  
     likelihood['compound'] = compound_list 
     if lst[0] > 1: 
-        likelihood.to_csv(figure_save+'/gain_quarter.csv')
+        likelihood.to_csv(figure_save+'/gain_monthly.csv')
     else:
-        likelihood.to_csv(figure_save+'/loss_quarter.csv')
+        likelihood.to_csv(figure_save+'/loss_monthly.csv')
     print(likelihood) 
 
-likelihoodQuarterly(loss_range) #calling function on loss % 
-likelihoodQuarterly(gain_range) #calling function on gain %
+likelihoodMonthly(loss_range) #calling function on loss % 
+likelihoodMonthly(gain_range) #calling function on gain %
 
 ##YEARLY (the multiple will change depending on entires; 1Y data has 220 entries, 272 entries) 
 
@@ -168,9 +168,10 @@ def findVaRDaily(lst): #this function returns VaR for implied quantiles at daily
     left = [] 
     right = []
     for i in lst: 
-        z_value = sample_mean + (i/2)/100
-        left_interval=sample_mean-z_value*sample_std 
-        right_interval=sample_mean+z_value*sample_std 
+        z_right=norm.ppf((100-(100-i)/2)/100)
+        z_left=norm.ppf((0+(100-i)/2)/100)
+        left_interval=(sample_mean)+z_left*sample_std
+        right_interval=(sample_mean)+z_right*sample_std
         left.append(left_interval) 
         right.append(right_interval) 
     var['Minimum Returns %'] = left
@@ -188,9 +189,10 @@ def findVaRMonthly(lst): #this function returns VaR for implied quantiles at dai
     left = [] 
     right = []
     for i in lst: 
-        z_value = sample_mean*20 + (i/2)/100
-        left_interval=sample_mean*20-z_value*sample_std 
-        right_interval=sample_mean*20+z_value*sample_std 
+        z_right=norm.ppf((100-(100-i)/2)/100)
+        z_left=norm.ppf((0+(100-i)/2)/100)
+        left_interval=(sample_mean*20)+z_left*sample_std*20 
+        right_interval=(sample_mean*20)+z_right*sample_std*20 
         left.append(left_interval) 
         right.append(right_interval) 
     var['Minimum Returns %'] = left

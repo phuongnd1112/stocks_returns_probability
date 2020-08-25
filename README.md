@@ -1,19 +1,20 @@
 # STOCKS RETURNS ANALYSES
-PLEASE READ BEFORE BEGINNING. 
-This script provides a quick tool to aid with analysing and visualising stocks returns. Functionalities: 
+This repo provides a quick tool to aid with analysing and visualising stocks returns (some script has restricted functionalities). <br> 
+Functionalities: 
 - Graphing moving averages 
 - Graphing log returns data and normally distributed values 
 - Calculate probability of % loss and gain 
 - Calculate Values at Risk (VaR) at set confidence intervals 
 
-Script Specific Requirements
-```function_general``` Data From Investing.com 
-```function_tcbs``` API from TCBS (unv) 
+## Script Specific Requirements <br> 
+```function_general``` Data From Investing.com; saved as a CSV file (pathname required when script runs) <br>  
+```function_tcbs``` API from TCBS (restricted access) 
 
 ## Install Packages 
 Install all packages used in the script before running by pasting either one of the following into the command line: 
 - ```pip3 install pandas numpy matplotlib seaborn scipy.stats datetime``` 
-- ```pip install pandas numpy matplotlib seaborn scipy.stats datetime``` 
+- ```pip install pandas numpy matplotlib seaborn scipy.stats datetime``` <br> 
+With TCBS-specific script, API required. 
 
 Why each lib: 
 1. **pandas**: data manipulation tools 
